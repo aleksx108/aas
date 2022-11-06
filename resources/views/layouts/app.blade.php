@@ -40,6 +40,12 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('home') }}">{{ __('Sākums') }}</a>
                         </li>
+
+                        @if ( auth()->user() != null && auth()->user()->hasRole('moderator'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('review-moderate-list') }}">{{ __('Administrēt atsauksmes') }}</a>
+                            </li>
+                        @endif
                     
                     </ul>
 
@@ -47,9 +53,11 @@
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
 
-                        <li class="nav-item">
-                            <a class="btn btn-success" href="{{ route('review-create') }}">{{ __('Pievienot atsauksmi') }}</a>
-                        </li>
+                        @if (! (auth()->user() != null && auth()->user()->hasRole('moderator')))
+                            <li class="nav-item">
+                                <a class="btn btn-success" href="{{ route('review-create') }}">{{ __('Pievienot atsauksmi') }}</a>
+                            </li>
+                        @endif
 
                         @guest
                             @if (Route::has('login'))

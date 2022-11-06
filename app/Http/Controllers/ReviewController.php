@@ -5,19 +5,45 @@ namespace App\Http\Controllers;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
 use App\Models\Review as ModelsReview;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {    
 
-    public function index()
+    public function index(Request $request)
     {
-        $reviews = ModelsReview::all();
+
+        $filter = $request->all();
+        if(!empty($filter)){
+            $reviews = ModelsReview::query();
+            $reviews ->join('instructors', 'reviews.instructor_id', '=', 'instructors.id');
+            // dd($filter);
+
+            if($filter['name'] != null){
+                $reviews->where('instructors.name', 'like', '%'.$filter['name'].'%');
+            }
+
+            if($filter['surname'] != null){
+                $reviews->where('instructors.surname', 'like', '%'.$filter['surname'].'%');
+            }
+
+            if($filter['category'] != null && $filter['category']  != '--'){
+                $reviews->where('category', 'like', '%'.$filter['category'].'%');
+            }
+
+            $reviews = $reviews->get();
+        }else{
+            $reviews = ModelsReview::all();
+        }
+
         return view('review.index', ['reviews' => $reviews]);
     }
     
     public function create(Request $request)
     {
+        
         //redirect if not logged in
         if (Auth::user() == null) {
             return redirect()->route('login');
@@ -63,8 +89,57 @@ class ReviewController extends Controller
         //
     }
     
-    public function destroy($id)
+    public function destroy(Request $request, $review_id)
     {
-        //
+
+        if (! (Auth::user() != null && Auth::user()->hasRole('moderator'))){
+            return redirect()->back();
+        }
+
+        ModelsReview::where('id',$review_id)->delete();
+
+        $request->session()->flash('status', 'Review was deleted successfully!');
+
+        return redirect()->back();
+    }
+
+    public function moderateList(){
+
+        if (! (Auth::user() != null && Auth::user()->hasRole('moderator'))){
+            return redirect()->back();
+        }
+
+        $reviews = ModelsReview::all();
+        return view('review.moderate-list', ['reviews' => $reviews]);
+    }
+
+    public function banReviewAuthor(Request $request, $creator_id){
+
+        if (! (Auth::user() != null && Auth::user()->hasRole('moderator'))){
+            return redirect()->back();
+        }
+
+        $user = User::find($creator_id);
+        $user->banned = 1;
+        $user->save();
+
+        $request->session()->flash('status', $user->name. ' was banned successfully!');
+
+        return redirect()->back();
+    }
+
+    public function unbanReviewAuthor(Request $request, $creator_id){
+
+        if (! (Auth::user() != null && Auth::user()->hasRole('moderator'))){
+            return redirect()->back();
+        }
+
+        $user = User::find($creator_id);
+        $user->banned = 0;
+        $user->save();
+
+        $request->session()->flash('status', $user->name. ' was un-banned successfully!');
+
+        return redirect()->back();
     }
 }

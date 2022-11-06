@@ -19,11 +19,11 @@
                         </div>
                         <div class="col-md-3 col-6">
                             <label class="form-label">Kategorija</label>
-                            <select class="form-select" name="instructors">
+                            <select class="form-select" name="category">
                                 <option selected>--</option>
                                 <option value="A">A</option>
                                 <option value="B">B</option>
-                                <option value="C">c</option>
+                                <option value="C">C</option>
                             </select>
                         </div>
                         <div class="col-md-3 col-6">
