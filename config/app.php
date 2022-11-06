@@ -175,6 +175,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        //https://spatie.be/docs/laravel-permission/v5/
+        Spatie\Permission\PermissionServiceProvider::class,
+
     ],
 
     /*
